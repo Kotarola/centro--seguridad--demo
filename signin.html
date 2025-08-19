@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Centro de Seguridad • Verificación</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0f172a;--card:#0b1220;--ink:#e5e7eb;--muted:#9ca3af;--accent:#3b82f6}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,Arial;background:linear-gradient(120deg,#0f172a,#111827)}
+.wrap{min-height:100vh;display:grid;place-items:center}
+.card{width:min(420px,92vw);background:rgba(11,18,32,.95);color:var(--ink);border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#22d3ee)}
+h1{font-size:1.15rem;margin:0} p{color:var(--muted);margin:.25rem 0 1rem}
+label{display:block;font-size:.9rem;margin:.5rem 0 .25rem}
+input{width:100%;padding:12px 14px;border:1px solid #374151;border-radius:10px;background:#0b1220;color:var(--ink)}
+button{width:100%;padding:12px 16px;border:0;border-radius:12px;background:var(--accent);color:white;font-weight:600;cursor:pointer;margin-top:12px}
+.small{display:block;margin-top:8px;color:#93c5fd;font-size:.8rem;text-align:center}
+#toast{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55)}
+.toast{background:#0b1220;color:#e5e7eb;border:1px solid #334155;border-radius:12px;padding:18px 20px;max-width:420px}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="brand">
+    <div class="logo"></div>
+    <div>
+      <h1>Centro de Seguridad</h1>
+      <p>Verificación de sesión</p>
+    </div>
+  </div>
+
+  <form id="f" action="#" method="post" autocomplete="off">
+    <label for="user">Usuario o correo</label>
+    <input id="user" name="user" type="text" placeholder="usuario@empresa.local" required>
+
+    <label for="pass">Contraseña</label>
+    <input id="pass" name="pass" type="password" placeholder="••••••••" required>
+
+    <button type="submit">Continuar</button>
+    <span class="small">No compartas tu contraseña con nadie.</span>
+  </form>
+</div></div>
+
+<div id="toast"><div class="toast">
+  <strong>Simulación educativa</strong><br>
+  Este ejercicio no envió ni almacenó credenciales.<br>
+  (Página estática de demostración)
+</div></div>
+
+<script>
+  // Prefill del usuario desde ?u=...
+  const params = new URLSearchParams(location.search);
+  const u = params.get('u'); if (u) document.getElementById('user').value = u;
+
+  // Intercepta el submit: NO envía nada, solo muestra aviso
+  document.getElementById('f').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    // Limpieza defensiva (no conservar valores en memoria)
+    document.getElementById('user').value = "";
+    document.getElementById('pass').value = "";
+    document.getElementById('toast').style.display='grid';
+    setTimeout(()=>{ document.getElementById('toast').style.display='none'; }, 3500);
+  });
+</script>
+</body>
+</html>

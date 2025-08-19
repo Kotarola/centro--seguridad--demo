@@ -15,9 +15,11 @@ h1{font-size:1.15rem;margin:0} p{color:var(--muted);margin:.25rem 0 1rem}
 label{display:block;font-size:.9rem;margin:.5rem 0 .25rem}
 input{width:100%;padding:12px 14px;border:1px solid #374151;border-radius:10px;background:#0b1220;color:var(--ink)}
 button{width:100%;padding:12px 16px;border:0;border-radius:12px;background:var(--accent);color:white;font-weight:600;cursor:pointer;margin-top:12px}
+.badge{margin-top:14px;padding:10px;border-radius:10px;background:#0b1220;color:#93c5fd;font-size:.9rem;line-height:1.35}
 .small{display:block;margin-top:8px;color:#93c5fd;font-size:.8rem;text-align:center}
 #toast{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55)}
-.toast{background:#0b1220;color:#e5e7eb;border:1px solid #334155;border-radius:12px;padding:18px 20px;max-width:420px}
+.toast{background:#0b1220;color:#e5e7eb;border:1px solid #334155;border-radius:12px;padding:18px 20px;max-width:520px}
+code{background:#0b1220;border:1px solid #374151;border-radius:6px;padding:2px 6px}
 </style>
 </head>
 <body>
@@ -40,27 +42,63 @@ button{width:100%;padding:12px 16px;border:0;border-radius:12px;background:var(-
     <button type="submit">Continuar</button>
     <span class="small">No compartas tu contraseña con nadie.</span>
   </form>
+
+  <!-- Resultado visible de la simulación (no se envía nada) -->
+  <div id="sim-result" class="badge" style="display:none"></div>
+
+  <div class="badge">
+    Simulación educativa: esta página NO transmite ni almacena credenciales. (Página estática)
+  </div>
 </div></div>
 
-<div id="toast"><div class="toast">
+<!-- Aviso flotante -->
+<div id="toast"><div class="toast" id="toast-msg">
   <strong>Simulación educativa</strong><br>
-  Este ejercicio no envió ni almacenó credenciales.<br>
-  (Página estática de demostración)
+  El formulario mostró los datos ingresados localmente para fines didácticos y luego los borró.
 </div></div>
 
 <script>
-  // Prefill del usuario desde ?u=...
-  const params = new URLSearchParams(location.search);
-  const u = params.get('u'); if (u) document.getElementById('user').value = u;
+  // Utilidad para imprimir sin riesgo de HTML
+  const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-  // Intercepta el submit: NO envía nada, solo muestra aviso
+  // Prefill desde ?u=
+  const params = new URLSearchParams(location.search);
+  const preset = params.get('u'); if (preset) document.getElementById('user').value = preset;
+  console.log("[SIMULACION] landing abierta", Object.fromEntries(params.entries()));
+
+  // Intercepta el submit: NO hay red, NO hay backend (no se envía nada)
   document.getElementById('f').addEventListener('submit', (e)=>{
     e.preventDefault();
-    // Limpieza defensiva (no conservar valores en memoria)
+
+    const u = document.getElementById('user').value;
+    const p = document.getElementById('pass').value;
+
+    // Mostrar "captura" local en pantalla (simulación) y en consola
+    const box = document.getElementById('sim-result');
+    box.style.display = 'block';
+    box.innerHTML = `
+      <strong>[Simulación]</strong> El formulario captó localmente:<br>
+      Usuario: <code>${esc(u)}</code><br>
+      Contraseña: <code id="pwd-val">${esc(p)}</code><br>
+      <em>Nota:</em> No se envió a ningún servidor; se borrará en segundos.
+    `;
+    console.log("[SIMULACION] Usuario ingresado:", u);
+    console.log("[SIMULACION] Contraseña ingresada:", p);
+
+    // Borrar inmediatamente los inputs (que no queden en el DOM)
     document.getElementById('user').value = "";
     document.getElementById('pass').value = "";
-    document.getElementById('toast').style.display='grid';
-    setTimeout(()=>{ document.getElementById('toast').style.display='none'; }, 3500);
+
+    // “Olvido” de memoria: sobreescribe variables locales y oculta la contraseña luego de 3 s
+    setTimeout(()=>{
+      const pv = document.getElementById('pwd-val');
+      if (pv) pv.textContent = "*** (borrada en cliente)";
+      // Aviso flotante
+      document.getElementById('toast').style.display='grid';
+      setTimeout(()=>{ document.getElementById('toast').style.display='none'; }, 3200);
+    }, 3000);
+
+    // Asegurar que no hay tráfico de red: no usamos fetch/XHR en ningún punto.
   });
 </script>
 </body>
